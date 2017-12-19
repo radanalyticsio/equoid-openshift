@@ -1,0 +1,1 @@
+# equoid-openshift
