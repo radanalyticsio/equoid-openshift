@@ -22,7 +22,7 @@ These instructions are for setting up Equoid on Openshift.
     1. `psql -c 'CREATE TABLE SALES (ITEMID TEXT NOT NULL, QUANTITY INTEGER NOT NULL);' -h postgresql salesdb daikon`
     2. `psql -c 'ALTER TABLE SALES ADD CONSTRAINT ITEMPK PRIMARY KEY (ITEMID);' -h postgresql salesdb daikon`  
     2. `exit`
-6. `oc new-app openshift/python-34-centos7:latest~https://github.com/eldritchjs/equoid-data-handler`
+6. `oc new-app --template=oshinko-pyspark-build-dc -p APPLICATION_NAME=equoid-data-handler -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler -p GIT_REF=amqprcv -p APP_FILE=app.py -p SPARK_OPTIONS='--jars libs/spark-streaming-amqp_2.11-0.3.2-SNAPSHOT.jar'`
 7. `oc expose svc/equoid-data-handler`
 8. ``AMQPODNAME=`oc get pods | grep broker-amq | awk '{split($0,a," *"); print a[1]}'` ``
 9. `oc port-forward $AMQPODNAME 5672 5672`
