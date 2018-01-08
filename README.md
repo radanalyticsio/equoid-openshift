@@ -19,4 +19,4 @@ These instructions are for setting up Equoid on Openshift.
 8. ``AMQPODNAME=`oc get pods | grep broker-amq | awk '{split($0,a," *"); print a[1]}'` ``
 9. `oc port-forward $AMQPODNAME 5672 5672`
 10. Run equoid-data-publisher per https://github.com/EldritchJS/equoid-data-publisher
-11. TODO
+11. Run equoid-data-handler per https://github.com/EldritchJS/equoid-data-handler 
