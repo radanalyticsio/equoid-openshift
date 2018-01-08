@@ -4,9 +4,8 @@
 
 These instructions are for setting up Equoid on Openshift.
 
-1. `wget https://raw.githubusercontent.com/jboss-openshift/application-templates/master/jboss-image-streams.json`
 1. `oc login -u system:admin <openshift address>:<openshift port>`
-1. `oc create -n openshift -f jboss-image-streams.json`
+1. `oc create -n openshift -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-basic.json`
 1. `oc logout`
 1. `oc login -u <username> <openshift address>:<openshift port>`
 1. `oc new-project equoid`
