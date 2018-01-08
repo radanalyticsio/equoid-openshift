@@ -1,4 +1,3 @@
-# equoid-openshift
 # Equoid Openshift (local cluster) Setup
 
 These instructions are for setting up Equoid on Openshift local cluster.
