@@ -40,8 +40,12 @@ oc new-project equoid
 
 6. instantiate the amqp template
 ```bash 
-oc new-app --template=amq63-basic -p MQ_PROTOCOL=amqp -p MQ_QUEUES=salesq -p MQ_TOPICS=salest \
-   -p MQ_USERNAME=daikon -p MQ_PASSWORD=daikon
+oc new-app --template=amq63-basic \
+	-p MQ_PROTOCOL=amqp \
+	-p MQ_QUEUES=salesq \
+	-p MQ_TOPICS=salest \
+   	-p MQ_USERNAME=daikon\
+	-p MQ_PASSWORD=daikon
 ```
 
 7. instantiate the infinispan template
@@ -56,7 +60,13 @@ oc create -f https://radanalytics.io/resources.yaml
 
 9. create the data handler app (consumer of the events)
 ```bash
-oc new-app --template=oshinko-java-spark-build-dc -p APPLICATION_NAME=equoid-data-handler -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler -p APP_MAIN_CLASS=io.radanalytics.equoid.dataHandler -p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar -p APP_ARGS='broker-amq-amqp 5672 daikon daikon salesq datagrid-hotrod 11333' -p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
+oc new-app --template=oshinko-java-spark-build-dc \
+	-p APPLICATION_NAME=equoid-data-handler \
+	-p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
+	-p APP_MAIN_CLASS=io.radanalytics.equoid.dataHandler \
+	-p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
+	-p APP_ARGS='broker-amq-amqp 5672 daikon daikon salesq datagrid-hotrod 11333' \
+	-p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 ```
 8. get amqp pod ID from openshift 
 ```bash
@@ -70,5 +80,10 @@ oc port-forward $AMQPODNAME 5672 5672
 11. Run equoid-data-publisher per https://github.com/EldritchJS/equoid-data-publisher
 11. (Optional) create cache checker for periodic key checking of \<KEY\_TO\_CHECK\> every five seconds for \<ITERATIONS\> times
 ```bash
-	oc new-app --template=oshinko-java-spark-build-dc -p APPLICATION_NAME=equoid-data-handler -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler -p APP_MAIN_CLASS=io.radanalytics.equoid.checkCache -p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar -p APP_ARGS='datagrid-hotrod 11333 <KEY_TO_CHECK> <ITERATIONS>'
+oc new-app --template=oshinko-java-spark-build-dc \
+	-p APPLICATION_NAME=equoid-data-handler \
+	-p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
+	-p APP_MAIN_CLASS=io.radanalytics.equoid.checkCache \
+	-p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
+	-p APP_ARGS='datagrid-hotrod 11333 <KEY_TO_CHECK> <ITERATIONS>'
 ```
