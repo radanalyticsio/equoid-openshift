@@ -1,29 +1,77 @@
-# equoid-openshift
+# Equoid Openshift (local cluster) Setup
 
-#Equoid Openshift Setup#
+These instructions are for setting up Equoid on Openshift local cluster.
+1. make sure you have oc client in version `3.7`
+```bash
+oc version
+# oc v3.7.0+7ed6862
+```
+2. run the local cluster
+```bash
+oc cluster up
+```
 
-These instructions are for setting up Equoid on Openshift.
+3. prepare image streams and some templates in the `openshift` namespace
+```bash
+oc login -u system:admin
+```
 
-1. `oc login -u <username> <openshift url>`
-1. `oc new-project equoid`
-2. Browse to: \<openshift url\>:8443/console 
-3. Add to project -> Browse catalog -> Red Hat JBoss A-MQ 6.3 (Ephemeral, no SSL) with options
-    * MQ_PROTOCOL=amqp
-    * MQ_QUEUES=salesq
-    * MQ_TOPICS=salest
-    * MQ_USERNAME=daikon
-    * MQ_PASSWORD=daikon
-3. Add to project -> Browse catalog -> PostgreSQL (Ephemeral) with options
-    * POSTGRESQL_USER=daikon
-    * POSTGRESQL_PASSWORD=daikon
-    * POSTGRESQL_DATABASE=salesdb
-4. Back to local bash shell, ``PODNAME=`oc get pods | grep postgresql | awk '{split($0,a," *"); print a[1]}'` ``
-5. `oc rsh $PODNAME`
-    1. `psql -c 'CREATE TABLE SALES (ITEMID TEXT NOT NULL, QUANTITY INTEGER NOT NULL);' -h postgresql salesdb daikon`
-    2. `psql -c 'ALTER TABLE SALES ADD CONSTRAINT ITEMPK PRIMARY KEY (ITEMID);' -h postgresql salesdb daikon`  
-    2. `exit`
-6. `oc new-app --template=oshinko-pyspark-build-dc -p APPLICATION_NAME=equoid-data-handler -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler -p GIT_REF=amqprcv -p APP_FILE=app.py -p SPARK_OPTIONS='--jars libs/spark-streaming-amqp_2.11-0.3.2-SNAPSHOT.jar'`
-7. `oc expose svc/equoid-data-handler`
+```bash
+# create image streams (needed by amq template)
+oc create -n openshift -f \
+  https://raw.githubusercontent.com/jboss-openshift/application-templates/master/jboss-image-streams.json
+```
+
+```bash
+# create the amqp ephemeral template
+oc create -n openshift -f \
+  https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-basic.json
+```
+
+```bash
+# create the mysql ephemeral template
+oc create -n openshift -f \
+  https://raw.githubusercontent.com/openshift/origin/master/examples/db-templates/postgresql-ephemeral-template.json
+```
+
+4. change the user to mere mortal again
+```bash
+oc login -u developer
+```
+
+5. create new project
+```bash
+oc new-project equoid
+```
+
+6. instantiate amqp the template
+```bash 
+oc new-app --template=amq63-basic -p MQ_PROTOCOL=amqp -p MQ_QUEUES=salesq -p MQ_TOPICS=salest \
+   -p MQ_USERNAME=daikon -p MQ_PASSWORD=daikon
+```
+
+7. instantiate the postgresql template
+```bash
+oc new-app --template=postgresql-ephemeral -p POSTGRESQL_USER=daikon -p POSTGRESQL_PASSWORD=daikon -p POSTGRESQL_DATABASE=salesdb
+```
+
+8. Find the pod name with the DB:
+```
+PODNAME=`oc get pods | grep postgresql | awk '{split($0,a," *"); print a[1]}'`
+```
+9. and create simple schema in it: `oc rsh $PODNAME`
+    1. `psql -U daikon -d salesdb -c 'CREATE TABLE SALES (ITEMID TEXT NOT NULL, QUANTITY INTEGER NOT NULL);'`
+    1. `psql -U daikon -d salesdb -c 'ALTER TABLE SALES ADD CONSTRAINT ITEMPK PRIMARY KEY (ITEMID);'`  
+    1. `exit`
+10. create radanalytics.io resources:
+```bash
+oc create -f https://radanalytics.io/resources.yaml
+```
+11. create the data handler app (consumer of the events)
+```bash
+oc new-app --template=oshinko-pyspark-build-dc -p APPLICATION_NAME=equoid-data-handler -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler -p GIT_REF=amqprcv -p APP_FILE=app.py -p SPARK_OPTIONS='--jars libs/spark-streaming-amqp_2.11-0.3.1.jar'
+```
+12. `oc expose svc/equoid-data-handler`
 8. ``AMQPODNAME=`oc get pods | grep broker-amq | awk '{split($0,a," *"); print a[1]}'` ``
 9. `oc port-forward $AMQPODNAME 5672 5672`
 10. Run equoid-data-publisher per https://github.com/EldritchJS/equoid-data-publisher
