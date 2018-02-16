@@ -28,12 +28,6 @@ oc create -n openshift -f \
   https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-basic.json
 ```
 
-```bash
-# create the mysql ephemeral template
-oc create -n openshift -f \
-  https://raw.githubusercontent.com/openshift/origin/master/examples/db-templates/postgresql-ephemeral-template.json
-```
-
 4. change the user to mere mortal again
 ```bash
 oc login -u developer
@@ -44,35 +38,37 @@ oc login -u developer
 oc new-project equoid
 ```
 
-6. instantiate amqp the template
+6. instantiate the amqp template
 ```bash 
 oc new-app --template=amq63-basic -p MQ_PROTOCOL=amqp -p MQ_QUEUES=salesq -p MQ_TOPICS=salest \
    -p MQ_USERNAME=daikon -p MQ_PASSWORD=daikon
 ```
 
-7. instantiate the postgresql template
+7. instantiate the infinispan template
 ```bash
-oc new-app --template=postgresql-ephemeral -p POSTGRESQL_USER=daikon -p POSTGRESQL_PASSWORD=daikon -p POSTGRESQL_DATABASE=salesdb
+oc create -f infinispan.json
 ```
 
-8. Find the pod name with the DB:
-```
-PODNAME=`oc get pods | grep postgresql | awk '{split($0,a," *"); print a[1]}'`
-```
-9. and create simple schema in it: `oc rsh $PODNAME`
-    1. `psql -U daikon -d salesdb -c 'CREATE TABLE SALES (ITEMID TEXT NOT NULL, QUANTITY INTEGER NOT NULL);'`
-    1. `psql -U daikon -d salesdb -c 'ALTER TABLE SALES ADD CONSTRAINT ITEMPK PRIMARY KEY (ITEMID);'`  
-    1. `exit`
-10. create radanalytics.io resources:
+8. create radanalytics.io resources:
 ```bash
 oc create -f https://radanalytics.io/resources.yaml
 ```
-11. create the data handler app (consumer of the events)
+
+9. create the data handler app (consumer of the events)
 ```bash
-oc new-app --template=oshinko-pyspark-build-dc -p APPLICATION_NAME=equoid-data-handler -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler -p GIT_REF=amqprcv -p APP_FILE=app.py -p SPARK_OPTIONS='--jars libs/spark-streaming-amqp_2.11-0.3.1.jar'
+oc new-app --template=oshinko-java-spark-build-dc -p APPLICATION_NAME=equoid-data-handler -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler -p APP_MAIN_CLASS=io.radanalytics.equoid.dataHandler -p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar -p APP_ARGS='broker-amq-amqp 5672 daikon daikon salesq datagrid-hotrod 11333' -p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 ```
-12. `oc expose svc/equoid-data-handler`
-8. ``AMQPODNAME=`oc get pods | grep broker-amq | awk '{split($0,a," *"); print a[1]}'` ``
-9. `oc port-forward $AMQPODNAME 5672 5672`
-10. Run equoid-data-publisher per https://github.com/EldritchJS/equoid-data-publisher
-11. Back to Openshift in your browser, Browse to equoid-data-handler
+8. get amqp pod ID from openshift 
+```bash
+AMQPODNAME=`oc get pods | grep broker-amq | awk '{split($0,a," *"); print a[1]}'` ``
+```
+
+9. forward your local machine's port to the amqp pod's port
+```bash
+oc port-forward $AMQPODNAME 5672 5672
+```
+11. Run equoid-data-publisher per https://github.com/EldritchJS/equoid-data-publisher
+11. (Optional) create cache checker for periodic key checking of \<KEY\_TO\_CHECK\> every five seconds for \<ITERATIONS\> times
+```bash
+	oc new-app --template=oshinko-java-spark-build-dc -p APPLICATION_NAME=equoid-data-handler -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler -p APP_MAIN_CLASS=io.radanalytics.equoid.checkCache -p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar -p APP_ARGS='datagrid-hotrod 11333 <KEY_TO_CHECK> <ITERATIONS>'
+```
