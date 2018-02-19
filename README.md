@@ -69,12 +69,12 @@ oc new-app --template=oshinko-java-spark-build-dc \
 	-p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
 	-p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 ```
-8. get amqp pod ID from openshift 
+9. get amqp pod ID from openshift 
 ```bash
 AMQPODNAME=`oc get pods | grep broker-amq | awk '{split($0,a," *"); print a[1]}'` ``
 ```
 
-9. forward your local machine's port to the amqp pod's port
+10. forward your local machine's port to the amqp pod's port
 ```bash
 oc port-forward $AMQPODNAME 5672 5672
 ```
@@ -87,7 +87,7 @@ oc new-app redhat-openjdk18-openshift~https://github.com/EldritchJS/equoid-data-
 	-e JAVA_ARGS='broker-amq-amqp 5672 daikon daikon salesq data/LiquorNames.txt'
 ```
 
-11. (Optional) create cache checker for periodic key checking of \<KEY\_TO\_CHECK\> every five seconds for \<ITERATIONS\> times
+12. (Optional) create cache checker for periodic key checking of \<KEY\_TO\_CHECK\> every five seconds for \<ITERATIONS\> times
 ```bash
 oc new-app --template=oshinko-java-spark-build-dc \
 	-p APPLICATION_NAME=equoid-check-cache \
