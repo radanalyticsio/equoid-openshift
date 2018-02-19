@@ -61,11 +61,12 @@ oc create -f https://radanalytics.io/resources.yaml
 9. create the data handler app (consumer of the events)
 ```bash
 oc new-app --template=oshinko-java-spark-build-dc \
+	-p OSHINKO_CLUSTER_NAME=sparky \
 	-p APPLICATION_NAME=equoid-data-handler \
 	-p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
 	-p APP_MAIN_CLASS=io.radanalytics.equoid.dataHandler \
-	-p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
 	-p APP_ARGS='broker-amq-amqp 5672 daikon daikon salesq datagrid-hotrod 11333' \
+	-p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
 	-p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 ```
 8. get amqp pod ID from openshift 
@@ -78,10 +79,18 @@ AMQPODNAME=`oc get pods | grep broker-amq | awk '{split($0,a," *"); print a[1]}'
 oc port-forward $AMQPODNAME 5672 5672
 ```
 11. Run equoid-data-publisher per https://github.com/EldritchJS/equoid-data-publisher
+```bash
+oc new-app redhat-openjdk18-openshift~https://github.com/EldritchJS/equoid-data-publisher \
+	-e JAVA_MAIN_CLASS=io.radanalytics.equoid.dataPublisher
+	-e ARTIFACT_COPY_ARGS='-r lib *.jar data'
+	-e JAVA_APP_JAR=equoid-data-publisher-1.0-SNAPSHOT.jar \
+	-e JAVA_ARGS='broker-amq-amqp 5672 daikon daikon salesq data/LiquorNames.txt'
+```
+
 11. (Optional) create cache checker for periodic key checking of \<KEY\_TO\_CHECK\> every five seconds for \<ITERATIONS\> times
 ```bash
 oc new-app --template=oshinko-java-spark-build-dc \
-	-p APPLICATION_NAME=equoid-data-handler \
+	-p APPLICATION_NAME=equoid-check-cache \
 	-p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
 	-p APP_MAIN_CLASS=io.radanalytics.equoid.checkCache \
 	-p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
