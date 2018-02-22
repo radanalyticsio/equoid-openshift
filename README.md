@@ -41,11 +41,11 @@ oc new-project equoid
 6. instantiate the amqp template
 ```bash 
 oc new-app --template=amq63-basic \
-	-p MQ_PROTOCOL=amqp \
-	-p MQ_QUEUES=salesq \
-	-p MQ_TOPICS=salest \
-   	-p MQ_USERNAME=daikon\
-	-p MQ_PASSWORD=daikon
+  -p MQ_PROTOCOL=amqp \
+  -p MQ_QUEUES=salesq \
+  -p MQ_TOPICS=salest \
+  -p MQ_USERNAME=daikon \
+  -p MQ_PASSWORD=daikon
 ```
 
 7. instantiate the infinispan template
@@ -61,13 +61,13 @@ oc create -f https://radanalytics.io/resources.yaml
 9. create the data handler app (consumer of the events)
 ```bash
 oc new-app --template=oshinko-java-spark-build-dc \
-	-p OSHINKO_CLUSTER_NAME=sparky \
-	-p APPLICATION_NAME=equoid-data-handler \
-	-p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
-	-p APP_MAIN_CLASS=io.radanalytics.equoid.dataHandler \
-	-p APP_ARGS='broker-amq-amqp 5672 daikon daikon salesq datagrid-hotrod 11333 <k> <epsilon> <confidence>' \
-	-p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
-	-p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
+  -p OSHINKO_CLUSTER_NAME=sparky \
+  -p APPLICATION_NAME=equoid-data-handler \
+  -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
+  -p APP_MAIN_CLASS=io.radanalytics.equoid.dataHandler \
+  -p APP_ARGS='broker-amq-amqp 5672 daikon daikon salesq datagrid-hotrod 11333 10 6 0.9' \
+  -p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
+  -p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 ```
 10. get amqp pod ID from openshift 
 ```bash
@@ -80,19 +80,19 @@ oc port-forward $AMQPODNAME 5672 5672
 ```
 12. Run equoid-data-publisher per https://github.com/EldritchJS/equoid-data-publisher
 ```bash
-oc new-app redhat-openjdk18-openshift~https://github.com/EldritchJS/equoid-data-publisher \
-	-e JAVA_MAIN_CLASS=io.radanalytics.equoid.dataPublisher
-	-e ARTIFACT_COPY_ARGS='-r lib *.jar data'
-	-e JAVA_APP_JAR=equoid-data-publisher-1.0-SNAPSHOT.jar \
-	-e JAVA_ARGS='broker-amq-amqp 5672 daikon daikon salesq data/LiquorNames.txt'
+oc new-app redhat-openjdk18-openshift:1.2~https://github.com/EldritchJS/equoid-data-publisher \
+  -e JAVA_MAIN_CLASS=io.radanalytics.equoid.dataPublisher \
+  -e ARTIFACT_COPY_ARGS='-r lib *.jar data' \
+  -e JAVA_APP_JAR=equoid-data-publisher-1.0-SNAPSHOT.jar \
+  -e JAVA_ARGS='broker-amq-amqp 5672 daikon daikon salesq data/LiquorNames.txt'
 ```
 
 13. (Optional) create cache checker for periodic key checking of \<KEY\_TO\_CHECK\> every five seconds for \<ITERATIONS\> times
 ```bash
 oc new-app --template=oshinko-java-spark-build-dc \
-	-p APPLICATION_NAME=equoid-check-cache \
-	-p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
-	-p APP_MAIN_CLASS=io.radanalytics.equoid.checkCache \
-	-p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
-	-p APP_ARGS='datagrid-hotrod 11333 <KEY_TO_CHECK> <ITERATIONS>'
+  -p APPLICATION_NAME=equoid-check-cache \
+  -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
+  -p APP_MAIN_CLASS=io.radanalytics.equoid.checkCache \
+  -p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
+  -p APP_ARGS='datagrid-hotrod 11333 <KEY_TO_CHECK> <ITERATIONS>'
 ```
