@@ -1,6 +1,7 @@
 # Equoid Openshift (local cluster) Setup
 
-These instructions are for setting up Equoid on Openshift local cluster.
+To run the Equoid on local cluster, you can use the `start.sh` script or run the following instructions manually.
+
 1. make sure you have oc client in version `3.7`
 ```bash
 oc version
@@ -40,7 +41,7 @@ oc new-project equoid
 
 6. instantiate the amqp template
 ```bash 
-oc new-app --template=amq63-basic \
+oc new-app -l app=broker --template=amq63-basic \
   -p MQ_PROTOCOL=amqp \
   -p MQ_QUEUES=salesq \
   -p MQ_TOPICS=salest \
@@ -60,7 +61,7 @@ oc create -f https://radanalytics.io/resources.yaml
 
 9. create the data handler app (consumer of the events)
 ```bash
-oc new-app --template=oshinko-java-spark-build-dc \
+oc new-app -l app=handler --template=oshinko-java-spark-build-dc \
   -p OSHINKO_CLUSTER_NAME=sparky \
   -p APPLICATION_NAME=equoid-data-handler \
   -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
@@ -69,25 +70,13 @@ oc new-app --template=oshinko-java-spark-build-dc \
   -p APP_FILE=equoid-data-handler-1.0-SNAPSHOT.jar \
   -p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 ```
-10. get amqp pod ID from openshift 
+
+10. Run equoid-data-publisher per https://github.com/EldritchJS/equoid-data-publisher
 ```bash
-AMQPODNAME=`oc get pods | grep broker-amq | awk '{split($0,a," *"); print a[1]}'` ``
+oc new-app -l app=publisher redhat-openjdk18-openshift:1.2~https://github.com/EldritchJS/equoid-data-publisher
 ```
 
-11. forward your local machine's port to the amqp pod's port
-```bash
-oc port-forward $AMQPODNAME 5672 5672
-```
-12. Run equoid-data-publisher per https://github.com/EldritchJS/equoid-data-publisher
-```bash
-oc new-app redhat-openjdk18-openshift:1.2~https://github.com/EldritchJS/equoid-data-publisher \
-  -e JAVA_MAIN_CLASS=io.radanalytics.equoid.dataPublisher \
-  -e ARTIFACT_COPY_ARGS='-r lib *.jar data' \
-  -e JAVA_APP_JAR=equoid-data-publisher-1.0-SNAPSHOT.jar \
-  -e JAVA_ARGS='broker-amq-amqp 5672 daikon daikon salesq data/LiquorNames.txt'
-```
-
-13. (Optional) create cache checker for periodic key checking of \<KEY\_TO\_CHECK\> every five seconds for \<ITERATIONS\> times
+11. (Optional) create cache checker for periodic key checking of \<KEY\_TO\_CHECK\> every five seconds for \<ITERATIONS\> times
 ```bash
 oc new-app --template=oshinko-java-spark-build-dc \
   -p APPLICATION_NAME=equoid-check-cache \
