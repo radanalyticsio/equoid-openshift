@@ -79,6 +79,7 @@ oc new-app -l app=publisher redhat-openjdk18-openshift:1.2~https://github.com/El
 11. (Optional) create cache checker for periodic key checking of \<KEY\_TO\_CHECK\> every five seconds for \<ITERATIONS\> times
 ```bash
 oc new-app --template=oshinko-java-spark-build-dc \
+  -l app=checker \
   -p APPLICATION_NAME=equoid-check-cache \
   -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
   -p APP_MAIN_CLASS=io.radanalytics.equoid.checkCache \
