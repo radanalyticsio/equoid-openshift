@@ -1,0 +1,210 @@
+kind: List
+apiVersion: v1
+metadata: {}
+
+items:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: equoid-data-handler
+  spec: {}
+
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: equoid-data-publisher
+  spec: {}
+
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: equoid-data-handler
+  spec:
+    source:
+      type: Git
+      git:
+        uri: https://github.com/eldritchjs/equoid-data-handler
+    strategy:
+      type: Source
+      sourceStrategy:
+        env: 
+          - name: OSHINKO_CLUSTER_NAME
+            value: sparky
+          - name: APPLICATION_NAME
+            value: equoid-data-handler 
+          - name: GIT_URI
+            value: https://github.com/eldritchjs/equoid-data-handler
+          - name: APP_MAIN_CLASS
+            value: io.radanalytics.equoid.dataHandler
+          - name: APP_FILE
+            value: equoid-data-handler-1.0-SNAPSHOT.jar 
+          - name: SPARK_OPTIONS
+            value: '--driver-java-options=-Dvertx.cacheDirBase=/tmp'
+        from: 
+          kind: DockerImage
+          name: radanalyticsio/radanalytics-java-spark
+    output:
+      to:
+        kind: ImageStreamTag
+        name: equoid-data-handler:latest
+
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: equoid-data-publisher
+  spec:
+    source:
+      type: Git
+      git:
+        uri: https://github.com/eldritchjs/equoid-data-publisher
+    strategy:
+      type: Source
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: redhat-openjdk18-openshift:1.2
+    output:
+      to:
+        kind: ImageStreamTag
+        name: equoid-data-publisher:latest
+
+- kind: Template
+  apiVersion: v1
+  template: equoid
+  metadata:
+    name: equoid
+  objects:
+
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata: 
+      name: equoid-data-publisher
+    spec: 
+      strategy:
+        type: Rolling
+      triggers:
+        - type: ConfigChange
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - equoid-data-publisher
+            from:
+              kind: ImageStreamTag
+              name: equoid-data-publisher:latest
+      replicas: 1
+      selector:
+        name: equoid-data-publisher
+      template:
+        metadata:
+          labels:
+            name: equoid-data-publisher
+        spec:
+          containers:
+            - name: equoid-data-publisher
+              image: equoid-data-publisher:latest
+              env:
+                - name: AMQPHOST
+                  value: ${AMQPH}
+                - name: AMQPPORT
+                  value: ${AMQPP}
+                - name: AMQPUSERNAME
+                  value: ${AMQPUID}
+                - name: AMQPPASSWORD
+                  value: ${AMQPPW}
+                - name: QUEUENAME
+                  value: ${AMQPQ} 
+                - name: DATAURL
+                  value: ${DATAU}  
+
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: equoid-data-handler
+    spec:
+      strategy:
+        type: Rolling
+      triggers:
+        - type: ConfigChange
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - equoid-data-handler
+            from:
+              kind: ImageStreamTag
+              name: equoid-data-handler:latest
+      replicas: 1
+      selector:
+        name: equoid-data-handler
+      template:
+        metadata:
+          labels: 
+            name: equoid-data-handler
+        spec:
+          containers:
+            - name: equoid-data-handler
+              image: equoid-data-handler:latest
+              env:
+                - name: AMQPHOST
+                  value: ${AMQPH}
+                - name: AMQPPORT
+                  value: ${AMQPP}
+                - name: AMQPUSERNAME
+                  value: ${AMQPUID}
+                - name: AMQPPASSWORD
+                  value: ${AMQPPW}
+                - name: QUEUENAME
+                  value: ${AMQPQ}
+                - name: CMSK
+                  value: ${KVAL}
+                - name: CMSEPSILON
+                  value: ${EPS}
+                - name: CMSCONFIDENCE
+                  value: ${CONF}
+
+  parameters:
+    - name: AMQPH
+      description: Hostname for AMQ-P broker
+      value: "broker-amq-amqp"
+      required: true
+    - name: AMQPP
+      description: Port number for AMQ-P broker
+      value: "5672"
+      required: true
+    - name: AMQPUID
+      description: Username for AMQ-P broker
+      value: "daikon"
+      required: true
+    - name: AMQPPW
+      description: Password for AMQ-P broker
+      value: "daikon"
+      required: true
+    - name: AMQPQ
+      description: AMQ-P queue name
+      value: "salesq"
+      required: true
+    - name: DATAU
+      description: URL to data source
+      value: "https://github.com/EldritchJS/equoid-data-publisher/blob/master/data/LiquorNames.txt"
+      required: true
+    - name: JDGH
+      description: Hostname for JDG
+      value: "datagrid-hotrod"
+      required: true
+    - name: JDGP
+      description: Port for JDG
+      value: "11333"
+      required: true
+    - name: KVAL
+      description: Number of top values
+      value: "3"
+      required: false
+    - name: EPS
+      description: Epsilon value for CMS
+      value: "0.1"
+      required: false
+    - name: CONF
+      description: Confidence value for CMS
+      value: "0.9"
+      required: false

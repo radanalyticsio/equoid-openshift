@@ -1,22 +1,27 @@
 #!/bin/bash
-docker kill `docker ps -q` || true
-oc cluster up
-oc login -u system:admin
-oc create -n openshift -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/jboss-image-streams.json
-oc create -n openshift -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-basic.json
-oc login -u developer
-
-oc new-project equoid
+#docker kill `docker ps -q` || true
+#oc cluster up
+#oc login -u system:admin
+#oc create -n openshift -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/jboss-image-streams.json
+#oc create -n openshift -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-basic.json
+#oc login -u developer
+#oc create -f jboss-image-streams.json
+#oc create -f amq63-basic.json
+oc new-project equoid-auto
+oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/jboss-image-streams.json
+oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-basic.json
 
 oc new-app --template=amq63-basic \
   -l app=broker \
+  -p IMAGE_STREAM_NAMESPACE=equoid
+  --image-stream=jboss-amq-63:1.2 \
   -p MQ_PROTOCOL=amqp \
   -p MQ_QUEUES=salesq \
   -p MQ_TOPICS=salest \
   -p MQ_USERNAME=daikon \
-  -p MQ_PASSWORD=daikon
+  -p MQ_PASSWORD=daikon \
+  -p AMQ_MESH_DISCOVERY_TYPE=kube
   
-
 oc create -f infinispan.json
 oc create -f https://radanalytics.io/resources.yaml
 
@@ -36,5 +41,8 @@ oc new-app --template=oshinko-java-spark-build-dc \
 
 sleep 5
 
-oc new-app -l app=publisher redhat-openjdk18-openshift:1.2~https://github.com/EldritchJS/equoid-data-publisher
+oc new-app \
+	-l app=publisher \
+	--image-stream=redhat-openjdk18-openshift:1.2 \
+	https://github.com/EldritchJS/equoid-data-publisher 
 
