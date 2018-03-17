@@ -25,7 +25,7 @@
             "type": "ConfigChange"
           }
         ],
-        "replicas": 1,
+        "replicas": 3,
         "selector": {
           "deploymentConfig": "datagrid"
         },
@@ -41,7 +41,7 @@
             "containers": [
               {
                 "name": "datagrid",
-                "image": "jboss/infinispan-server",
+                "image": "jboss/infinispan-server:latest",
                 "imagePullPolicy": "Always",
                 "args" : ["cloud","-Djboss.default.jgroups.stack=kubernetes"],
                 "ports": [

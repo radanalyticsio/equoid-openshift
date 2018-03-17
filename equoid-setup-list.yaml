@@ -35,14 +35,14 @@ items:
           - name: GIT_URI
             value: https://github.com/eldritchjs/equoid-data-handler
           - name: APP_MAIN_CLASS
-            value: io.radanalytics.equoid.dataHandler
+            value: io.radanalytics.equoid.DataHandler
           - name: APP_FILE
             value: equoid-data-handler-1.0-SNAPSHOT.jar 
           - name: SPARK_OPTIONS
             value: '--driver-java-options=-Dvertx.cacheDirBase=/tmp'
         from: 
           kind: DockerImage
-          name: radanalyticsio/radanalytics-java-spark
+          name: radanalyticsio/radanalytics-scala-spark
     output:
       to:
         kind: ImageStreamTag
@@ -116,6 +116,18 @@ items:
                   value: ${AMQPQ} 
                 - name: DATAURL
                   value: ${DATAU}  
+                - name: OSHINKO_CLUSTER_NAME
+                  value: sparky
+                - name: APPLICATION_NAME
+                  value: equoid-data-handler 
+                - name: GIT_URI
+                  value: https://github.com/eldritchjs/equoid-data-handler
+                - name: APP_MAIN_CLASS
+                  value: io.radanalytics.equoid.DataHandler
+                - name: APP_FILE
+                  value: equoid-data-handler-1.0-SNAPSHOT.jar 
+                - name: SPARK_OPTIONS
+                  value: '--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 
   - kind: DeploymentConfig
     apiVersion: v1
