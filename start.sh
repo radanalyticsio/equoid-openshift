@@ -40,5 +40,5 @@ oc new-app --template=oshinko-scala-spark-build-dc \
 	-e jdgPort=11333 \
 	-p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 
-oc new-app -l app=publisher redhat-openjdk18-openshift:1.2~https://github.com/eldritchjs/equoid-data-publisher 
+oc new-app --allow-missing-imagestream-tags -l app=publisher redhat-openjdk18-openshift:1.2~https://github.com/eldritchjs/equoid-data-publisher 
 
