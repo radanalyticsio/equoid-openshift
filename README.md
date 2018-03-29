@@ -100,7 +100,6 @@ oc new-app --template=oshinko-scala-spark-build-dc \
 	-p APPLICATION_NAME=equoid-check-cache \
 	-p SBT_ARGS=assembly \
 	-p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
-	-p GIT_REF=ivupdate \
 	-p APP_MAIN_CLASS=io.radanalytics.equoid.CheckCache \
 	-e jdgHost=datagrid-hotrod \
 	-e jdgPort=11222
