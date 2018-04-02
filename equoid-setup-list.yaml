@@ -30,14 +30,14 @@ items:
         env: 
           - name: OSHINKO_CLUSTER_NAME
             value: sparky
+          - name: SBT_ARGS
+            value: assembly
           - name: APPLICATION_NAME
             value: equoid-data-handler 
           - name: GIT_URI
             value: https://github.com/eldritchjs/equoid-data-handler
           - name: APP_MAIN_CLASS
             value: io.radanalytics.equoid.DataHandler
-          - name: APP_FILE
-            value: equoid-data-handler-1.0-SNAPSHOT.jar 
           - name: SPARK_OPTIONS
             value: '--driver-java-options=-Dvertx.cacheDirBase=/tmp'
         from: 
@@ -116,19 +116,6 @@ items:
                   value: ${AMQPQ} 
                 - name: DATAURL
                   value: ${DATAU}  
-                - name: OSHINKO_CLUSTER_NAME
-                  value: sparky
-                - name: APPLICATION_NAME
-                  value: equoid-data-handler 
-                - name: GIT_URI
-                  value: https://github.com/eldritchjs/equoid-data-handler
-                - name: APP_MAIN_CLASS
-                  value: io.radanalytics.equoid.DataHandler
-                - name: APP_FILE
-                  value: equoid-data-handler-1.0-SNAPSHOT.jar 
-                - name: SPARK_OPTIONS
-                  value: '--driver-java-options=-Dvertx.cacheDirBase=/tmp'
-
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
@@ -168,12 +155,22 @@ items:
                   value: ${AMQPPW}
                 - name: QUEUENAME
                   value: ${AMQPQ}
+                - name: JDGHOST
+                  value: ${JDGH}
+                - name: JDGPORT
+                  value: ${JDGP}                
                 - name: CMSK
                   value: ${KVAL}
                 - name: CMSEPSILON
                   value: ${EPS}
                 - name: CMSCONFIDENCE
                   value: ${CONF}
+                - name: WINDOWSECONDS
+                  value: ${WINSEC}
+                - name: SLIDESECONDS
+                  value: ${SLIDESEC}
+                - name: SPARKMASTER
+                  value: ${SPARKM}
 
   parameters:
     - name: AMQPH
@@ -206,7 +203,7 @@ items:
       required: true
     - name: JDGP
       description: Port for JDG
-      value: "11333"
+      value: "11222"
       required: true
     - name: KVAL
       description: Number of top values
@@ -219,4 +216,16 @@ items:
     - name: CONF
       description: Confidence value for CMS
       value: "0.9"
+      required: false
+    - name: WINSEC
+      description: Seconds in a sample window
+      value: "30"
+      required: false
+    - name: SLIDESEC
+      description: Seconds in slide interval
+      value: "30"
+      required: false
+    - name: SPARKM
+      description: Spark master connection string
+      value: "spark://sparky:7077"
       required: false
