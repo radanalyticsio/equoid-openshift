@@ -89,18 +89,14 @@ oc new-app --template=oshinko-scala-spark-build-dc \
 ```bash
 oc new-app --allow-missing-imagestream-tags \
 	-l app=publisher \
-	--image-stream=$PROJECT_NAME/redhat-openjdk18-openshift:1.2 \
+	--image-stream=equoid/redhat-openjdk18-openshift:1.2 \
 	https://github.com/eldritchjs/equoid-data-publisher 
 ```
 
-12. (Optional) create cache checker for periodic dumping of the contents of the Infinispan cache:
+12. (Optional) create infinispan-dump app for periodic dumping of the contents of the Infinispan cache:
 ```bash
-oc new-app --template=oshinko-scala-spark-build-dc \
-	-l app=checker \
-	-p APPLICATION_NAME=equoid-check-cache \
-	-p SBT_ARGS=assembly \
-	-p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
-	-p APP_MAIN_CLASS=io.radanalytics.equoid.CheckCache \
-	-e jdgHost=datagrid-hotrod \
-	-e jdgPort=11222
+oc new-app --allow-missing-imagestream-tags \
+	-l app=infinispan-dump \
+	--image-stream=equoid/redhat-openjdk18.openshift:1.2 \
+	https://github.com/eldritchjs/infinispan-dump
 ```
