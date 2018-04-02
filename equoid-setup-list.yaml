@@ -20,6 +20,11 @@ items:
   metadata:
     name: equoid-data-handler
   spec:
+    triggers: 
+      - 
+        type: "ImageChange"
+      -
+        type: "ConfigChange"
     source:
       type: Git
       git:
@@ -53,6 +58,11 @@ items:
   metadata:
     name: equoid-data-publisher
   spec:
+    triggers:
+      - 
+        type: "ImageChange"
+      - 
+        type: "ConfigChange"
     source:
       type: Git
       git:
