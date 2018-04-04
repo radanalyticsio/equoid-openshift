@@ -105,17 +105,17 @@ items:
             - name: equoid-data-publisher
               image: equoid-data-publisher:latest
               env:
-                - name: AMQPHOST
+                - name: AMQP_HOST
                   value: ${AMQPH}
-                - name: AMQPPORT
+                - name: AMQP_PORT
                   value: ${AMQPP}
-                - name: AMQPUSERNAME
+                - name: AMQP_USERNAME
                   value: ${AMQPUID}
-                - name: AMQPPASSWORD
+                - name: AMQP_PASSWORD
                   value: ${AMQPPW}
-                - name: QUEUENAME
+                - name: QUEUE_NAME
                   value: ${AMQPQ}
-                - name: DATAURL
+                - name: DATA_URL
                   value: ${DATAU}
   - kind: DeploymentConfig
     apiVersion: v1
@@ -152,31 +152,31 @@ items:
               value: "--driver-java-options=-Dvertx.cacheDirBase=/tmp"
             - name: APP_MAIN_CLASS
               value: io.radanalytics.equoid.DataHandler
-            - name: AMQPHOST
+            - name: AMQP_HOST
               value: ${AMQPH}
-            - name: AMQPPORT
+            - name: AMQP_PORT
               value: ${AMQPP}
-            - name: AMQPUSERNAME
+            - name: AMQP_USERNAME
               value: ${AMQPUID}
-            - name: AMQPPASSWORD
+            - name: AMQP_PASSWORD
               value: ${AMQPPW}
-            - name: QUEUENAME
+            - name: QUEUE_NAME
               value: ${AMQPQ}
-            - name: JDGHOST
+            - name: JDG_HOST
               value: ${JDGH}
-            - name: JDGPORT
+            - name: JDG_PORT
               value: ${JDGP}                
             - name: CMSK
               value: ${KVAL}
-            - name: CMSEPSILON
+            - name: CMS_EPSILON
               value: ${EPS}
-            - name: CMSCONFIDENCE
+            - name: CMS_CONFIDENCE
               value: ${CONF}
-            - name: WINDOWSECONDS
+            - name: WINDOW_SECONDS
               value: ${WINSEC}
-            - name: SLIDESECONDS
+            - name: SLIDE_SECONDS
               value: ${SLIDESEC}
-            - name: SPARKMASTER
+            - name: SPARK_MASTER
               value: ${SPARKM}
             image: equoid-data-handler:latest
             name: equoid-data-handler
