@@ -22,7 +22,7 @@ oc new-app --template=amq63-basic \
     -p MQ_QUEUES=salesq \
     -p MQ_USERNAME=daikon \
     -p MQ_PASSWORD=daikon \
-    -p IMAGE_STREAM_NAMESPACE=$PROJECT_NAME
+    -p IMAGE_STREAM_NAMESPACE=`oc project -q`
 
 oc create -f https://radanalytics.io/resources.yaml
 
@@ -31,7 +31,7 @@ oc create -f https://raw.githubusercontent.com/infinispan/infinispan-openshift-t
 oc new-app --template=infinispan-ephemeral \
     -l app=datagrid \
     -p APPLICATION_NAME=datagrid \
-    -p NAMESPACE=$PROJECT_NAME \
+    -p NAMESPACE=`oc project -q` \
     -p APPLICATION_USER=daikon \
     -p APPLICATION_PASSWORD=daikon \
     -p MANAGEMENT_USER=daikon \
@@ -51,7 +51,7 @@ oc new-app --template=oshinko-scala-spark-build-dc \
 
 oc new-app --allow-missing-imagestream-tags \
     -l app=publisher \
-    --image-stream=$PROJECT_NAME/redhat-openjdk18-openshift:1.2 \
+    --image-stream=`oc project -q`/redhat-openjdk18-openshift:1.2 \
     https://github.com/eldritchjs/equoid-data-publisher
 
 oc new-app oshinko-webui
