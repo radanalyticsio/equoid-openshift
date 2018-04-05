@@ -138,10 +138,6 @@
       description: AMQ-P queue name
       value: "salesq"
       required: true
-    - name: DATAU
-      description: URL to data source
-      value: "https://github.com/EldritchJS/equoid-data-publisher/blob/master/data/LiquorNames.txt"
-      required: true
     - name: JDGH
       description: Hostname for JDG
       value: "datagrid-hotrod"
