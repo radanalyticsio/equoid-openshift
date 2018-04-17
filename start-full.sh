@@ -14,10 +14,12 @@ then
 fi
 
 oc new-project $PROJECT_NAME
-oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/jboss-image-streams.json
+oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/openjdk/openjdk18-image-stream.json
+oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-image-stream.json
 oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-basic.json
 
 oc new-app --template=amq63-basic \
+    -l app=amqp \
     -p MQ_PROTOCOL=amqp \
     -p MQ_QUEUES=salesq \
     -p MQ_USERNAME=daikon \
@@ -51,7 +53,7 @@ oc new-app --template=oshinko-scala-spark-build-dc \
 
 oc new-app --allow-missing-imagestream-tags \
     -l app=publisher \
-    --image-stream=`oc project -q`/redhat-openjdk18-openshift:1.2 \
+    --image-stream=`oc project -q`/redhat-openjdk18-openshift:1.3 \
     https://github.com/eldritchjs/equoid-data-publisher
 
 oc new-app oshinko-webui

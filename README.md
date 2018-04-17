@@ -28,9 +28,10 @@ oc login -u developer
 oc new-project equoid
 ```
 
-5. Create the JBoss image streams needed for AMQ-P:
+5. Create the JBoss image streams needed for AMQ-P and publisher:
 ```bash
-oc create -f  https://raw.githubusercontent.com/jboss-openshift/application-templates/master/jboss-image-streams.json
+oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/openjdk/openjdk18-image-stream.json
+oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-image-stream.json
 ```
 
 6. Create the AMQ-P template:
@@ -42,11 +43,11 @@ oc create -n openshift -f \
 6. Instantiate the AMQ-P template:
 ```bash
 oc new-app --template=amq63-basic \
-	-p MQ_PROTOCOL=amqp \
-	-p MQ_QUEUES=salesq \
-        -p MQ_USERNAME=daikon \
-	-p MQ_PASSWORD=daikon \
-        -p IMAGE_STREAM_NAMESPACE=equoid	
+  -p MQ_PROTOCOL=amqp \
+  -p MQ_QUEUES=salesq \
+  -p MQ_USERNAME=daikon \
+  -p MQ_PASSWORD=daikon \
+  -p IMAGE_STREAM_NAMESPACE=equoid  
 ```
 
 7. Create radanalytics.io resources:
@@ -62,13 +63,13 @@ oc create -f https://raw.githubusercontent.com/infinispan/infinispan-openshift-t
 9. Instantiate the Infinispan template:
 ```bash
 oc new-app --template=infinispan-ephemeral \
-	-l app=datagrid \
-	-p APPLICATION_NAME=datagrid \
-	-p NAMESPACE=equoid \
-	-p APPLICATION_USER=daikon \
-	-p APPLICATION_PASSWORD=daikon \
-	-p MANAGEMENT_USER=daikon \
-	-p MANAGEMENT_PASSWORD=daikon 
+  -l app=datagrid \
+  -p APPLICATION_NAME=datagrid \
+  -p NAMESPACE=equoid \
+  -p APPLICATION_USER=daikon \
+  -p APPLICATION_PASSWORD=daikon \
+  -p MANAGEMENT_USER=daikon \
+  -p MANAGEMENT_PASSWORD=daikon 
 ```
 
 10. Create the data handler app (consumer of the events):
@@ -88,15 +89,15 @@ oc new-app --template=oshinko-scala-spark-build-dc \
 11. Create the data publisher app (producer of the events):
 ```bash
 oc new-app --allow-missing-imagestream-tags \
-	-l app=publisher \
-	--image-stream=equoid/redhat-openjdk18-openshift:1.2 \
-	https://github.com/eldritchjs/equoid-data-publisher 
+  -l app=publisher \
+  --image-stream=equoid/redhat-openjdk18-openshift:1.3 \
+  https://github.com/eldritchjs/equoid-data-publisher 
 ```
 
 12. (Optional) create infinispan-dump app for periodic dumping of the contents of the Infinispan cache:
 ```bash
 oc new-app --allow-missing-imagestream-tags \
-	-l app=infinispan-dump \
-	--image-stream=equoid/redhat-openjdk18.openshift:1.2 \
-	https://github.com/eldritchjs/infinispan-dump
+  -l app=infinispan-dump \
+  --image-stream=equoid/redhat-openjdk18.openshift:1.3 \
+  https://github.com/eldritchjs/infinispan-dump
 ```
