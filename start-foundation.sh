@@ -14,12 +14,13 @@ then
 fi
 
 oc new-project $PROJECT_NAME
-oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/jboss-image-streams.json
+oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-image-stream.json
 oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-basic.json
 
 oc create -f https://radanalytics.io/resources.yaml
 
 oc new-app --template=amq63-basic \
+  -l app=amqp \
   -p MQ_PROTOCOL=amqp \
 	-p MQ_QUEUES=salesq \
   -p MQ_USERNAME=daikon \
