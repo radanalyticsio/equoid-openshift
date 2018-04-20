@@ -56,4 +56,4 @@ oc new-app --allow-missing-imagestream-tags \
     --image-stream=`oc project -q`/redhat-openjdk18-openshift:1.3 \
     https://github.com/eldritchjs/equoid-data-publisher
 
-oc new-app oshinko-webui
+./web-ui/apply.sh

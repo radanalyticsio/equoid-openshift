@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: equoid-app-template
+  namespace: equoid
+  annotations:
+    description: This template defines objects that are required to spin up an keycloak service and pod
+    tags: equoid, keycloak, service
+    openshift.io/display-name: keycloak-template
+    openshift.io/long-description: This template defines objects that are required to spin up an keycloak service and pod.
+    openshift.io/provider-display-name: Keycloak
+labels:
+  app: equoid-keycloak
+  createdBy: radanalytics.io
+parameters:
+  -
+    name: APPLICATION_NAME
+    value: keycloak
+    description: Name of the Keycloak microservice
+    required: true
+    displayName: Application Name
+  -
+    name: CONTAINER_IMAGE
+    value: jkremser/keycloak:3.4.3.Final
+    description: Container image to be used for the Keycloak
+    required: true
+    displayName: Keycloak Container Image
+  -
+    name: KEYCLOAK_USER
+    value: admin
+    description: Default Keycloak admin user
+    required: true
+    displayName: Keycloak User
+  -
+    name: KEYCLOAK_PASSWORD
+    value: admin
+    description: Default Keycloak admin password
+    required: true
+    displayName: Keycloak Password
+  -
+    name: APP_PORT
+    value: "8080"
+    description: Port of the keycloak application
+    required: true
+    displayName: Application Port
+objects:
+  -
+    apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      name: ${APPLICATION_NAME}
+    spec:
+      strategy:
+        type: Rolling
+        rollingParams:
+          updatePeriodSeconds: 1
+          intervalSeconds: 1
+          timeoutSeconds: 600
+          maxUnavailable: 25%
+          maxSurge: 25%
+        resources:
+      replicas: "1"
+      template:
+        metadata:
+          labels:
+            app: ${APPLICATION_NAME}
+        spec:
+          containers:
+          - name: ${APPLICATION_NAME}
+            image: ${CONTAINER_IMAGE}
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - name: kc-realm-vol
+                mountPath: /opt/jboss/keycloak/realm
+                readOnly: true
+              - name: kc-users-vol
+                mountPath: /opt/jboss/keycloak/users
+                readOnly: true
+            command:
+              - "/bin/sh"
+              - "-c"
+              - |
+                  mkdir -p /tmp/config
+                  cp /opt/jboss/keycloak/realm/*.json /tmp/config
+                  cp /opt/jboss/keycloak/users/*.json /tmp/config
+                  /opt/jboss/docker-entrypoint.sh -b 0.0.0.0 -Dkeycloak.migration.action=import \
+                   -Dkeycloak.migration.provider=dir -Dkeycloak.migration.dir=/tmp/config \
+                   -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
+            env:
+            - name: DB_VENDOR
+              value: H2
+            - name: KEYCLOAK_USER
+              value: ${KEYCLOAK_USER}
+            - name: KEYCLOAK_PASSWORD
+              value: ${KEYCLOAK_PASSWORD}
+            ports:
+            - name: http
+              containerPort: "${APP_PORT}"
+          volumes:
+            - name: kc-realm-vol
+              secret:
+                secretName: kc-realm
+            - name: kc-users-vol
+              secret:
+                secretName: kc-users
+  -
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: ${APPLICATION_NAME}
+      name: ${APPLICATION_NAME}
+    spec:
+      selector:
+        app: ${APPLICATION_NAME}
+      type: LoadBalancer
+      ports:
+      - name: http
+        port: "${APP_PORT}"
+  -
+    apiVersion: v1
+    kind: Route
+    metadata:
+      name: ${APPLICATION_NAME}
+    spec:
+      to:
+        kind: Service
+        name: ${APPLICATION_NAME}
+        weight: "100"
+      port:
+        targetPort: "http"
+      wildcardPolicy: None
