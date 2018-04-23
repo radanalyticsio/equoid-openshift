@@ -51,9 +51,21 @@ oc new-app --template=oshinko-scala-spark-build-dc \
     -e JDG_PORT=11222 \
     -p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 
-oc new-app --allow-missing-imagestream-tags \
+
+echo "Waiting for the imagestreamtag redhat-openjdk18-openshift:1.3"
+until oc get imagestreamtag/redhat-openjdk18-openshift:1.3 &> /dev/null ; do
+  printf "$(tput setaf 6)▮$(tput sgr0)"
+  sleep 1
+done
+
+oc new-app \
     -l app=publisher \
     --image-stream=`oc project -q`/redhat-openjdk18-openshift:1.3 \
     https://github.com/eldritchjs/equoid-data-publisher
 
-oc new-app oshinko-webui
+# web-ui
+BASE_URL="https://raw.githubusercontent.com/Jiri-Kremser/equoid-ui/master/ocp/"
+curl -sSL $BASE_URL/ocp-apply.sh | \
+    BASE_URL="$BASE_URL" \
+    KC_REALM_PATH="web-ui/keycloak/realm-config" \
+    bash -s stable
