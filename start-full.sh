@@ -63,4 +63,9 @@ oc new-app \
     --image-stream=`oc project -q`/redhat-openjdk18-openshift:1.3 \
     https://github.com/eldritchjs/equoid-data-publisher
 
-./web-ui/apply.sh
+# web-ui
+BASE_URL="https://raw.githubusercontent.com/Jiri-Kremser/equoid-ui/master/ocp/"
+curl -sSL $BASE_URL/ocp-apply.sh | \
+    BASE_URL="$BASE_URL" \
+    KC_REALM_PATH="web-ui/keycloak/realm-config" \
+    bash -s stable
