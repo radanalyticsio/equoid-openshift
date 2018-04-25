@@ -13,7 +13,7 @@ then
     PROJECT_NAME=$1
 fi
 
-oc new-project $PROJECT_NAME
+oc new-project $PROJECT_NAME || oc project $PROJECT_NAME
 oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/openjdk/openjdk18-image-stream.json
 oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-image-stream.json
 oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-basic.json
