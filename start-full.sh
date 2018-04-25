@@ -13,7 +13,7 @@ then
     PROJECT_NAME=$1
 fi
 
-oc new-project $PROJECT_NAME
+oc new-project $PROJECT_NAME || oc project $PROJECT_NAME
 oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/openjdk/openjdk18-image-stream.json
 oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-image-stream.json
 oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/amq/amq63-basic.json
@@ -49,6 +49,8 @@ oc new-app --template=oshinko-scala-spark-build-dc \
     -p APP_MAIN_CLASS=io.radanalytics.equoid.DataHandler \
     -e JDG_HOST=datagrid-hotrod \
     -e JDG_PORT=11222 \
+    -e WINDOW_SECONDS=20 \
+    -e SLIDE_SECONDS=20 \
     -p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 
 
