@@ -42,10 +42,9 @@ oc new-app --template=infinispan-ephemeral \
 oc new-app --template=oshinko-scala-spark-build-dc \
     -l app=handler \
     -p SBT_ARGS=assembly \
-    -p OSHINKO_CLUSTER_NAME=sparky-20 \
     -p APPLICATION_NAME=equoid-data-handler-20 \
     -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
-    -p GIT_REF=removesparky \
+    -p GIT_REF=master \
     -p APP_MAIN_CLASS=io.radanalytics.equoid.DataHandler \
     -e JDG_HOST=datagrid-hotrod \
     -e JDG_PORT=11222 \
@@ -54,6 +53,12 @@ oc new-app --template=oshinko-scala-spark-build-dc \
     -e BATCH_SECONDS=20 \
     -p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 
+echo "Waiting for the imagestreamtag redhat-openjdk18-openshift:1.3"
+until oc get imagestreamtag/redhat-openjdk18-openshift:1.3 &> /dev/null ; do
+  printf "$(tput setaf 6)▮$(tput sgr0)"
+  sleep 1
+  oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/openjdk/openjdk18-image-stream.json
+done
 
 oc new-app \
     -l app=publisher \

@@ -6,7 +6,6 @@ SECONDS=$1
 oc new-app --template=oshinko-scala-spark-build-dc \
     -l app=handler-$SECONDS \
     -p SBT_ARGS=assembly \
-    -p OSHINKO_CLUSTER_NAME=sparky-$SECONDS \
     -p APPLICATION_NAME=equoid-data-handler-$SECONDS \
     -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
     -p GIT_REF=master \
