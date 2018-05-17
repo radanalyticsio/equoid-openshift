@@ -71,3 +71,5 @@ curl -sSL $BASE_URL/ocp-apply.sh | \
     BASE_URL="$BASE_URL" \
     KC_REALM_PATH="web-ui/keycloak/realm-config" \
     bash -s stable
+
+oc policy add-role-to-user edit system:serviceaccount:$PROJECT_NAME:default
