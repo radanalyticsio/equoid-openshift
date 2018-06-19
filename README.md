@@ -25,7 +25,7 @@ oc create -f equoid-setup-list.yaml
 ### Manual Setup ###
 If interested in the system setup steps, the following instructions can be followed:
 
-1. Make certain you have oc client in version `3.7`:
+1. Make certain you have oc client in version `3.7` or higher:
 ```bash
 oc version
 # oc v3.7.0+7ed6862
