@@ -40,9 +40,9 @@ oc new-app --template=infinispan-ephemeral \
     -p MANAGEMENT_PASSWORD=daikon
 
 oc new-app --template=oshinko-scala-spark-build-dc \
-    -l app=handler-20 \
+    -l app=handler-20-stock \
     -p SBT_ARGS=assembly \
-    -p APPLICATION_NAME=equoid-data-handler-20 \
+    -p APPLICATION_NAME=equoid-data-handler-20-stock \
     -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
     -p GIT_REF=master \
     -p APP_MAIN_CLASS=io.radanalytics.equoid.DataHandler \
@@ -51,6 +51,7 @@ oc new-app --template=oshinko-scala-spark-build-dc \
     -e WINDOW_SECONDS=20 \
     -e SLIDE_SECONDS=20 \
     -e BATCH_SECONDS=20 \
+    -e OP_MODE=stock
     -p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 
 echo "Waiting for the imagestreamtag redhat-openjdk18-openshift:1.3"
@@ -62,6 +63,7 @@ done
 
 oc new-app \
     -l app=publisher \
+    -e OP_MODE=single
     --image-stream=`oc project -q`/redhat-openjdk18-openshift:1.3 \
     https://github.com/eldritchjs/equoid-data-publisher
 
