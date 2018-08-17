@@ -51,7 +51,7 @@ oc new-app --template=oshinko-scala-spark-build-dc \
     -e WINDOW_SECONDS=20 \
     -e SLIDE_SECONDS=20 \
     -e BATCH_SECONDS=20 \
-    -e OP_MODE=stock
+    -e OP_MODE=single \
     -p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 
 echo "Waiting for the imagestreamtag redhat-openjdk18-openshift:1.3"
@@ -63,9 +63,10 @@ done
 
 oc new-app \
     -l app=publisher \
-    -e OP_MODE=single
+    -e OP_MODE=linear \
+    -e DATA_URL_PRIMARY=https://raw.githubusercontent.com/EldritchJS/equoid-data-publisher/master/data/StockCodesLinear.txt \
     --image-stream=`oc project -q`/redhat-openjdk18-openshift:1.3 \
-    https://github.com/eldritchjs/equoid-data-publisher
+    https://github.com/eldritchjs/equoid-data-publisher 
 
 # web-ui
 BASE_URL="https://raw.githubusercontent.com/Jiri-Kremser/equoid-ui/master/ocp/"
