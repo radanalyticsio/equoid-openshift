@@ -94,7 +94,7 @@
               value: ${JDGH}
             - name: JDG_PORT
               value: ${JDGP}                
-            - name: CMSK
+            - name: CMS_K
               value: ${KVAL}
             - name: CMS_EPSILON
               value: ${EPS}
@@ -104,6 +104,8 @@
               value: ${WINSEC}
             - name: SLIDE_SECONDS
               value: ${SLIDESEC}
+            - name: OP_MODE
+              value: ${OPMODE}
             - name: SPARK_MASTER
               value: ${SPARKM}
             image: equoid-data-handler:latest
@@ -170,6 +172,10 @@
     - name: SLIDESEC
       description: Seconds in slide interval
       value: "30"
+      required: false
+    - name: OPMODE
+      description: Operating mode (single, dual, linear)
+      value: "single"
       required: false
     - name: SPARKM
       description: Spark master connection string

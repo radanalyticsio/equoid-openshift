@@ -115,8 +115,12 @@ items:
                   value: ${AMQPPW}
                 - name: QUEUE_NAME
                   value: ${AMQPQ}
-                - name: DATA_URL
-                  value: ${DATAU}
+                - name: DATA_URL_PRIMARY
+                  value: ${DATAUP}
+                - name: DATA_URL_SECONDARY
+                  value: ${DATAUS}
+                - name: OP_MODE
+                  value: ${OPMODE}
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
@@ -166,7 +170,7 @@ items:
               value: ${JDGH}
             - name: JDG_PORT
               value: ${JDGP}                
-            - name: CMSK
+            - name: CMS_K
               value: ${KVAL}
             - name: CMS_EPSILON
               value: ${EPS}
@@ -176,6 +180,8 @@ items:
               value: ${WINSEC}
             - name: SLIDE_SECONDS
               value: ${SLIDESEC}
+            - name: OP_MODE
+              value: ${OPMODE}
             - name: SPARK_MASTER
               value: ${SPARKM}
             image: equoid-data-handler:latest
@@ -215,10 +221,14 @@ items:
       description: AMQ-P queue name
       value: "salesq"
       required: true
-    - name: DATAU
-      description: URL to data source
+    - name: DATAUP
+      description: URL to primary data source
       value: "https://github.com/EldritchJS/equoid-data-publisher/blob/master/data/LiquorNames.txt"
       required: true
+    - name: DATAUS
+      description: URL to secondary data source
+      value: "https://github.com/EldritchJS/equoid-data-publisher/blob/master/data/LiquorNames.txt"
+      required: false 
     - name: JDGH
       description: Hostname for JDG
       value: "datagrid-hotrod"
@@ -246,6 +256,10 @@ items:
     - name: SLIDESEC
       description: Seconds in slide interval
       value: "30"
+      required: false
+    - name: OPMODE
+      description: Operating mode (single, dual, linear)
+      value: "single"
       required: false
     - name: SPARKM
       description: Spark master connection string
