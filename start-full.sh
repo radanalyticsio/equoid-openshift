@@ -21,7 +21,6 @@ oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templ
 oc create -f https://radanalytics.io/resources.yaml
 oc create -f https://raw.githubusercontent.com/infinispan/infinispan-openshift-templates/master/templates/infinispan-ephemeral.json
 
-
 oc new-app --template=amq63-basic \
     -l app=amqp \
     -p MQ_PROTOCOL=amqp \
@@ -43,7 +42,7 @@ oc new-app --template=oshinko-scala-spark-build-dc \
     -l app=handler-20-linear \
     -p SBT_ARGS=assembly \
     -p APPLICATION_NAME=equoid-data-handler-20-linear \
-    -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler \
+    -p GIT_URI=https://github.com/radanalyticsio/equoid-data-handler \
     -p GIT_REF=DataMod \
     -p APP_MAIN_CLASS=io.radanalytics.equoid.DataHandler \
     -e JDG_HOST=datagrid-hotrod \
@@ -68,7 +67,7 @@ oc new-app \
     -e OP_MODE=linear \
     -e DATA_URL_PRIMARY=https://raw.githubusercontent.com/radanalyticsio/equoid-data-publisher/master/data/StockCodesLinear.txt \
     --image-stream=`oc project -q`/redhat-openjdk18-openshift:1.3 \
-    https://github.com/eldritchjs/equoid-data-publisher 
+    https://github.com/radanalyticsio/equoid-data-publisher 
 
 # web-ui
 BASE_URL="https://raw.githubusercontent.com/Jiri-Kremser/equoid-ui/master/ocp/"
