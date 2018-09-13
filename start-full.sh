@@ -68,7 +68,7 @@ oc new-app \
     https://github.com/radanalyticsio/equoid-data-publisher 
 
 # web-ui
-BASE_URL="https://raw.githubusercontent.com/Jiri-Kremser/equoid-ui/master/ocp/"
+BASE_URL="https://raw.githubusercontent.com/radanalyticsio/equoid-ui/master/ocp/"
 curl -sSL $BASE_URL/ocp-apply.sh | \
     BASE_URL="$BASE_URL" \
     KC_REALM_PATH="web-ui/keycloak/realm-config" \
