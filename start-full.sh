@@ -31,7 +31,7 @@ oc new-app --template=infinispan-ephemeral \
     -p MANAGEMENT_PASSWORD=daikon
 
 oc new-app --template=oshinko-scala-spark-build-dc \
-    -l app=handler-20-artemis \
+    -l app=handler-20-linear \
     -p SBT_ARGS=assembly \
     -p APPLICATION_NAME=equoid-data-handler-20-linear \
     -p GIT_URI=https://github.com/eldritchjs/equoid-data-handler-1 \
