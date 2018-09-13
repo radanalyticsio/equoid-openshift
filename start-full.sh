@@ -43,7 +43,6 @@ oc new-app --template=oshinko-scala-spark-build-dc \
     -p SBT_ARGS=assembly \
     -p APPLICATION_NAME=equoid-data-handler-20-linear \
     -p GIT_URI=https://github.com/radanalyticsio/equoid-data-handler \
-    -p GIT_REF=DataMod \
     -p APP_MAIN_CLASS=io.radanalytics.equoid.DataHandler \
     -e JDG_HOST=datagrid-hotrod \
     -e JDG_PORT=11222 \
@@ -55,11 +54,10 @@ oc new-app --template=oshinko-scala-spark-build-dc \
 
 echo "Waiting for the imagestreamtag redhat-openjdk18-openshift:1.3"
 
-until oc create -f https://raw.githubusercontent.com/jboss-openshift/application-templates/master/openjdk/openjdk18-image-stream.json &> /dev/null; do
 until oc get imagestreamtag/redhat-openjdk18-openshift:1.3 &> /dev/null ; do
   printf "$(tput setaf 6)▮$(tput sgr0)"
   sleep 1
-  oc create -f https://raw.githubusercontent.com/radanalyticsio/equoid-openshift/master/openjdk18-image-streams.json
+  oc create -f https://raw.githubusercontent.com/radanalyticsio/equoid-openshift/master/openjdk18-image-stream.json
 done
 
 oc new-app \
