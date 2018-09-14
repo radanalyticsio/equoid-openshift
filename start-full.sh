@@ -36,7 +36,6 @@ oc new-app --template=oshinko-scala-spark-build-dc \
     -p SBT_ARGS=assembly \
     -p APPLICATION_NAME=equoid-data-handler-20-linear \
     -p GIT_URI=https://github.com/$GITHUB_OWNER/equoid-data-handler-1 \
-    -p GIT_REF=artemis \
     -p APP_MAIN_CLASS=io.radanalytics.equoid.DataHandler \
     -e JDG_HOST=datagrid-hotrod \
     -e JDG_PORT=11222 \
