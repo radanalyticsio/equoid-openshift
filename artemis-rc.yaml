@@ -1,0 +1,48 @@
+kind: List
+apiVersion: v1
+items:
+
+
+  -  apiVersion: v1
+     kind: ReplicationController
+     metadata:
+       name: broker-amq
+     spec:
+       replicas: 1
+       selector:
+         name: broker-amq
+       template:
+         metadata:
+           labels:
+               name: broker-amq
+         spec:
+           containers:
+                -
+                    name: broker-amq
+                    image: "redhatiot/artemis:latest"
+                    ports:
+                        - containerPort: 5672
+                    command:
+                        - /opt/apache-artemis-1.4.0/bin/run_artemis.sh
+                    volumeMounts:
+                        -
+                            name: vol-instance
+                            mountPath: "/var/run/artemis"
+                    env:
+                        -
+                            name: QUEUE_NAME
+                            value: "recordq"
+           volumes:
+                - emptyDir: {}
+                  name: vol-instance
+  -  apiVersion: v1
+     kind: Service
+     metadata: 
+       name: broker-amq-amqp
+     spec:
+       ports:
+       - 
+         port: 5672
+         targetPort: 5672    
+       selector:
+         name: broker-amq
