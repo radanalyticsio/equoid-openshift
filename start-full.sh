@@ -2,6 +2,7 @@
 
 PROJECT_NAME=equoid
 GITHUB_OWNER=eldritchjs
+OP_MODE=linear
 
 if [ $# -gt 1 ];
 then
@@ -32,17 +33,17 @@ oc new-app --template=infinispan-ephemeral \
     -p MANAGEMENT_PASSWORD=daikon
 
 oc new-app --template=oshinko-scala-spark-build-dc \
-    -l app=handler-20-linear \
+    -l app=handler-20-${OP_MODE} \
     -p SBT_ARGS=assembly \
-    -p APPLICATION_NAME=equoid-data-handler-20-linear \
+    -p APPLICATION_NAME=equoid-data-handler-20-${OP_MODE} \
     -p GIT_URI=https://github.com/$GITHUB_OWNER/equoid-data-handler \
     -p APP_MAIN_CLASS=io.radanalytics.equoid.DataHandler \
-    -e JDG_HOST=datagrid-hotrod \
-    -e JDG_PORT=11222 \
+    -e INFINISPAN_HOST=datagrid-hotrod \
+    -e INFINISPAN_PORT=11222 \
     -e WINDOW_SECONDS=20 \
     -e SLIDE_SECONDS=20 \
     -e BATCH_SECONDS=20 \
-    -e OP_MODE=linear \
+    -e OP_MODE=$OP_MODE \
     -p SPARK_OPTIONS='--driver-java-options=-Dvertx.cacheDirBase=/tmp'
 
 echo "Waiting for the imagestreamtag fuse-java"
@@ -54,8 +55,8 @@ until oc get imagestreamtag/fuse-java:latest &> /dev/null ; do
 done
 
 oc new-app \
-    -l app=publisher \
-    -e OP_MODE=linear \
+    -l app=publisher-${OP_MODE} \
+    -e OP_MODE=$OP_MODE \
     -e DATA_URL_PRIMARY=https://raw.githubusercontent.com/$GITHUB_OWNER/equoid-data-publisher/master/data/StockCodesLinear.txt \
     --image-stream=`oc project -q`/fuse-java \
     https://github.com/$GITHUB_OWNER/equoid-data-publisher 
@@ -67,4 +68,4 @@ curl -sSL $BASE_URL/ocp-apply.sh | \
     KC_REALM_PATH="web-ui/keycloak/realm-config" \
     bash -s stable
 
-oc policy add-role-to-user edit system:serviceaccount:$PROJECT_NAME:default
+oc policy add-role-to-user edit system:serviceaccount:`oc project -q`:default
